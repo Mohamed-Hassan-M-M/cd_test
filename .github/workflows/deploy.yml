@@ -16,25 +16,29 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
-      # 2. Setup SSH agent using your private key
+      # 2. Run tests (like PHPUnit)
+      - name: 🧪 Run PHPUnit Tests
+        run: php artisan test --env=testing
+
+      # 3. Setup SSH agent using your private key
       - name: 🔐 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 3. Dynamically trust the VPS fingerprint
+      # 4. Dynamically trust the VPS fingerprint
       - name: 🧾 Add server to known_hosts
         run: |
           ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
 
-      # 4. Upload deploy.sh script
+      # 5. Upload deploy.sh script
       - name: 📤 Upload deploy.sh to VPS
         run: |
           echo "Uploading deploy.sh..."
           scp deploy.sh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }}:/root/deploy.sh
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_IP }} "chmod +x /root/deploy.sh"
 
-      # 5. Run deploy.sh on the server
+      # 6. Run deploy.sh on the server
       - name: 🚀 Execute deploy.sh
         run: |
           echo "Running deployment..."
